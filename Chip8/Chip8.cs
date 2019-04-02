@@ -29,7 +29,7 @@ namespace Chip8
         {
             // Iniitalize registers and memory once.
 
-            pc = 0x200;     // Program counter starts at 0x200
+            pc = 0x0200;     // Program counter starts at 0x200
             opcode = 0;     // Reset current opcode
             I = 0;          // Reset index register
             sp = 0;         // Reset stack pointer
@@ -69,6 +69,8 @@ namespace Chip8
             Console.WriteLine(memory[512]);
             Console.WriteLine(memory[513]);
             Console.WriteLine(opcode);
+            Console.WriteLine(opcode & 0x00F0);
+            Console.WriteLine((opcode & 0x00F0)>>4);
             // Decode Opcode
             switch (opcode & 0xF000) // Here, only check first bit of opcode using bitwise AND
             {
@@ -89,8 +91,28 @@ namespace Chip8
                             break;
                     }
                     break;
+                case 0x1000: // 0x1NNN: Jump to address NNN
+                    pc = (ushort)(opcode & 0x0FFF); // Maybe, needs testing
+                    break;
+                case 0x2000: // 0x2NNN: Calls subroutine at NNN
+                    break;
+                case 0x3000: // 0x3XNN: Skip next instruction if VX == KK (increment PC by 2)
+                    if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)){
+                        pc += 2;
+                    }
+                    break;
+                case 0x4000: // 0x4XNN: Skip next instruction if VX != KK (increment PC by 2)
+                    if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)){
+                        pc += 2;
+                    }
+                    break;
+                case 0x5000: // 0x5XY0: Skip next instruction if VX == VY (increment PC by 2)
+                    if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]){
+                        pc += 2;
+                    }
+                    break;
                 default:
-                    Console.WriteLine("Error: No 'main' case caught opcode!");
+                    Console.WriteLine(opcode.ToString(), " Error: No 'main' case caught opcode!");
                     break;
             }
 

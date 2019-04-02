@@ -5,3 +5,10 @@ C:\Users\John\source\repos\Chip8\Chip8\obj\Debug\Chip8.csprojAssemblyReference.c
 C:\Users\John\source\repos\Chip8\Chip8\obj\Debug\Chip8.csproj.CoreCompileInputs.cache
 C:\Users\John\source\repos\Chip8\Chip8\obj\Debug\Chip8.exe
 C:\Users\John\source\repos\Chip8\Chip8\obj\Debug\Chip8.pdb
+D:\Github\Chip8_Emulator\Chip8\bin\Debug\Chip8.exe.config
+D:\Github\Chip8_Emulator\Chip8\bin\Debug\Chip8.exe
+D:\Github\Chip8_Emulator\Chip8\bin\Debug\Chip8.pdb
+D:\Github\Chip8_Emulator\Chip8\obj\Debug\Chip8.csprojResolveAssemblyReference.cache
+D:\Github\Chip8_Emulator\Chip8\obj\Debug\Chip8.csproj.CoreCompileInputs.cache
+D:\Github\Chip8_Emulator\Chip8\obj\Debug\Chip8.exe
+D:\Github\Chip8_Emulator\Chip8\obj\Debug\Chip8.pdb

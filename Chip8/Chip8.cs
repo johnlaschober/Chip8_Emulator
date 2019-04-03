@@ -117,6 +117,32 @@ namespace Chip8
                     break;
                 case 0x7000: // 0x7XNN : Adds NN to VX (carry flag not changed according to Wikipedia)
                     break;
+                case 0x8000:
+                    switch (opcode & 0x000F)
+                    {
+                        case 0x0000: // 0x8XY0: Sets VX to the value VY
+                            break;
+                        case 0x0001: // 0x8XY1: Sets VX to VX or VY (Bitwise OR)
+                            break;
+                        case 0x0002: // 0x8XY2: Sets VX to VX and VY (Bitwise AND)
+                            break;
+                        case 0x0003: // 0x8XY3: Sets VX to VX xor VY
+                            break;
+                        case 0x0004: // 0x8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
+                            break;
+                        case 0x0005: // 0x8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
+                            break;
+                        case 0x0006: // 0x8XY6: Stores the least significant bit of VX in VF and then shifts VX to the left by 1
+                            break;
+                        case 0x0007: // 0x8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow nad 1 when there isn't
+                            break;
+                        case 0x000E: // 0x8XYE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1
+                            break;
+                        default:
+                            Console.WriteLine("Error: No '0x8' case caught opcode!");
+                            break;
+                    }
+                    break;
                 default:
                     Console.WriteLine(opcode.ToString(), " Error: No 'main' case caught opcode!");
                     break;

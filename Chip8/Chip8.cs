@@ -53,7 +53,7 @@ namespace Chip8
                     memory[i + 512] = Convert.ToChar(Convert.ToUInt32(test, 16)); // Iffy but sure
                 }
             }
-            else
+            else // For testing purposes obviously
             {
                 memory[512] = Convert.ToChar(Convert.ToUInt32("00", 16)); // Iffy but sure
                 memory[513] = Convert.ToChar(Convert.ToUInt32("E0", 16)); // Iffy but sure
@@ -80,6 +80,8 @@ namespace Chip8
                     {
                         // 0x0NNN is a weird case. NNN is some passed in values, so it's not really 'static'
                         // 0x0NNN should come first
+                        // 0x0NNN is apparently not implemented? For older machines or something?
+
                         case 0x0000: // 0x00E0: Clears the screen 
                             Console.WriteLine("Clear screen");
                             break;
@@ -87,7 +89,7 @@ namespace Chip8
                             Console.WriteLine("Return from subroutine");
                             break; 
                         default:
-                            Console.WriteLine("Error: No '0x000' case caught opcode!");
+                            Console.WriteLine("Error: No '0x0' case caught opcode!");
                             break;
                     }
                     break;
@@ -96,7 +98,7 @@ namespace Chip8
                     break;
                 case 0x2000: // 0x2NNN: Calls subroutine at NNN
                     break;
-                case 0x3000: // 0x3XNN: Skip next instruction if VX == KK (increment PC by 2)
+                case 0x3000: // 0x3XNN: Skip next instruction if VX == NN (increment PC by 2)
                     if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)){
                         pc += 2;
                     }
@@ -110,6 +112,10 @@ namespace Chip8
                     if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]){
                         pc += 2;
                     }
+                    break;
+                case 0x6000: // 0x6XNN : Put NN into VX
+                    break;
+                case 0x7000: // 0x7XNN : Adds NN to VX (carry flag not changed according to Wikipedia)
                     break;
                 default:
                     Console.WriteLine(opcode.ToString(), " Error: No 'main' case caught opcode!");

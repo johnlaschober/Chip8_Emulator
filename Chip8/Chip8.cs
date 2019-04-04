@@ -25,9 +25,13 @@ namespace Chip8
         ushort[] stack = new ushort[16]; // Anytime you perform a jump or call a subroutine, store the pc in the stack before proceeding
         ushort sp; // stack pointer
 
+        Random rnd;
+
         public void Initailize()
         {
             // Iniitalize registers and memory once.
+
+            Random rnd = new Random();
 
             pc = 0x0200;     // Program counter starts at 0x200
             opcode = 0;     // Reset current opcode
@@ -114,19 +118,25 @@ namespace Chip8
                     }
                     break;
                 case 0x6000: // 0x6XNN : Put NN into VX
+                    V[(opcode & 0x0F00) >> 8] = (char)(opcode & 0x00FF);
                     break;
                 case 0x7000: // 0x7XNN : Adds NN to VX (carry flag not changed according to Wikipedia)
+                    V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] + (opcode & 0x00FF));
                     break;
                 case 0x8000:
                     switch (opcode & 0x000F)
                     {
                         case 0x0000: // 0x8XY0: Sets VX to the value VY
+                            V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
                             break;
                         case 0x0001: // 0x8XY1: Sets VX to VX or VY (Bitwise OR)
+                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4]);
                             break;
                         case 0x0002: // 0x8XY2: Sets VX to VX and VY (Bitwise AND)
+                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4]);
                             break;
                         case 0x0003: // 0x8XY3: Sets VX to VX xor VY
+                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4]);
                             break;
                         case 0x0004: // 0x8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
                             break;
@@ -142,6 +152,24 @@ namespace Chip8
                             Console.WriteLine("Error: No '0x8' case caught opcode!");
                             break;
                     }
+                    break;
+                case 0x9000: // 0x9XY0: Skips the next instruction if VX doesn't equal VY
+                    if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]){
+                        pc += 2;
+                    }
+                    break;
+                case 0xA000: // 0xANNN: Sets I to the address NNN
+                    I = (ushort)(opcode & 0x0FFF);
+                    pc += 2;
+                    break;
+                case 0xB000: // 0xBNNN: Jumps to the address NNN plus V0
+                    pc = (ushort)((ushort)(opcode & 0x0FFF) + V[0]); // Again, needs testing
+                    break;
+                case 0xC000: // 0xCXNN: Sets VX to the result of a bitwise AND operation on a random number (typically 0 to 255) and NN
+                    ushort rand = (ushort)rnd.Next(0, 255);
+                    V[(ushort)(opcode & 0x0F00)] = (char)(rand & (ushort)(opcode & 0x00FF)); // Did casting as a char... work?
+                    break;
+                case 0xD000: // Sprite drawing
                     break;
                 default:
                     Console.WriteLine(opcode.ToString(), " Error: No 'main' case caught opcode!");

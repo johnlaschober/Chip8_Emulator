@@ -94,6 +94,7 @@ namespace Chip8
                             break; 
                         default:
                             Console.WriteLine("Error: No '0x0' case caught opcode!");
+                            // This might actually catch the 0x0NNN case
                             break;
                     }
                     break;
@@ -170,6 +171,44 @@ namespace Chip8
                     V[(ushort)(opcode & 0x0F00)] = (char)(rand & (ushort)(opcode & 0x00FF)); // Did casting as a char... work?
                     break;
                 case 0xD000: // Sprite drawing
+                    break;
+                case 0xE000:
+                    switch(opcode & 0x000F)
+                    {
+                        case 0x000E: // 0xEX9E: Skips next instruction if key stored in VX is pressed
+                            break;
+                        case 0x0001: // 0xEXA1: Skips next instruction if key stored in VX isn't pressed
+                            break;
+                        default:
+                            Console.WriteLine("Error: No '0xE' case caught opcode!");
+                            break;
+                    }
+                    break;
+                case 0xF000:
+                    switch(opcode & 0x00FF)
+                    {
+                        case 0x0007: // 0xFX07: Sets VX to the value of the DT
+                            break;
+                        case 0x000A: // 0xFX0A: Wait for a key press, store the value in VX
+                            break;
+                        case 0x0015: // 0xFX15: Delay timer (DT) = VX
+                            break;
+                        case 0x0018: // 0xFX18: Sound timer (ST) = VX
+                            break;
+                        case 0x001E: // 0xFX1E: I = I + VX
+                            break;
+                        case 0x0029:
+                            break;
+                        case 0x0033:
+                            break;
+                        case 0x0055:
+                            break;
+                        case 0x0065:
+                            break;
+                        default:
+                            Console.WriteLine("Error: No '0xF' case caught opcode!");
+                            break;
+                    }
                     break;
                 default:
                     Console.WriteLine(opcode.ToString(), " Error: No 'main' case caught opcode!");

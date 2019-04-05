@@ -12,18 +12,21 @@ namespace Chip8
         ushort opcode; // unsigned 16-bit integer 0 to 65,535
                        // Chip 8 has 35 opcodes, each 2 bytes long
 
-        char[] memory = new char[4096]; // 4 kilobytes memory, supposed to be unsigned?
+        byte[] memory = new byte[4096]; // 4 kilobytes memory
 
-        char[] V = new char[16]; // Chip 8 has 15 8-bit general purpose registers named V0, V1, up to VE
+        byte[] V = new byte[16]; // Chip 8 has 15 8-bit general purpose registers named V0, V1, up to VE
                                  // 16th register is the carry flag
 
         ushort I; // Index register
         ushort pc; // Program counter
 
-        char[,] gfx = new char[64,32];
+        byte[,] gfx = new byte[64,32];
 
         ushort[] stack = new ushort[16]; // Anytime you perform a jump or call a subroutine, store the pc in the stack before proceeding
         ushort sp; // stack pointer
+
+        byte delay_timer;
+        byte sound_timer;
 
         Random rnd;
 
@@ -38,11 +41,10 @@ namespace Chip8
             I = 0;          // Reset index register
             sp = 0;         // Reset stack pointer
 
-            // Rather than new, we might want to clear in the future?
-            gfx = new char[64, 32]; // Clear display
-            stack = new ushort[16]; // Clear stack
-            V = new char[16]; // Clear registers V0-Vf
-            memory = new char[4096]; // Clear memory
+            Array.Clear(gfx, 0, gfx.Length); // Clear display
+            Array.Clear(stack, 0, stack.Length);  // Clear stack
+            Array.Clear(V, 0, V.Length); // Clear registers V0-Vf
+            Array.Clear(memory, 0, memory.Length); // Clear memory
 
             bool readFromFile = false;
             if (readFromFile)
@@ -54,13 +56,13 @@ namespace Chip8
                 for (int i = 0; i < fileBytes.Length; i++) // Whether this is loading in the right bytes or not is anyone's guess
                 {
                     string test = string.Format("{0:x}", fileBytes[i]); // Right
-                    memory[i + 512] = Convert.ToChar(Convert.ToUInt32(test, 16)); // Iffy but sure
+                    memory[i + 512] = Convert.ToByte(Convert.ToUInt32(test, 16)); // Iffy but sure
                 }
             }
             else // For testing purposes obviously
             {
-                memory[512] = Convert.ToChar(Convert.ToUInt32("00", 16)); // Iffy but sure
-                memory[513] = Convert.ToChar(Convert.ToUInt32("E0", 16)); // Iffy but sure
+                memory[512] = Convert.ToByte(Convert.ToUInt32("00", 16)); // Iffy but sure
+                memory[513] = Convert.ToByte(Convert.ToUInt32("E0", 16)); // Iffy but sure
             }
 
             Console.WriteLine("Chip8 initialized");
@@ -87,13 +89,18 @@ namespace Chip8
                         // 0x0NNN is apparently not implemented? For older machines or something?
 
                         case 0x0000: // 0x00E0: Clears the screen 
+                            Array.Clear(gfx, 0, gfx.Length);
+                            pc += 2;
                             Console.WriteLine("Clear screen");
                             break;
                         case 0x000E: // 0x00EE: Returns from a subroutine
+                            pc = stack[sp];
+                            --sp;
                             Console.WriteLine("Return from subroutine");
                             break; 
                         default:
                             Console.WriteLine("Error: No '0x0' case caught opcode!");
+                            pc += 2; // Move to next opcode?
                             // This might actually catch the 0x0NNN case
                             break;
                     }
@@ -102,52 +109,92 @@ namespace Chip8
                     pc = (ushort)(opcode & 0x0FFF); // Maybe, needs testing
                     break;
                 case 0x2000: // 0x2NNN: Calls subroutine at NNN
+                    stack[sp] = pc;
+                    ++sp;
+                    pc = (ushort)(opcode & 0x0FFF);
                     break;
                 case 0x3000: // 0x3XNN: Skip next instruction if VX == NN (increment PC by 2)
                     if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)){
                         pc += 2;
                     }
+                    pc += 2;
                     break;
                 case 0x4000: // 0x4XNN: Skip next instruction if VX != KK (increment PC by 2)
                     if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)){
                         pc += 2;
                     }
+                    pc += 2;
                     break;
                 case 0x5000: // 0x5XY0: Skip next instruction if VX == VY (increment PC by 2)
                     if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]){
                         pc += 2;
                     }
+                    pc += 2;
                     break;
                 case 0x6000: // 0x6XNN : Put NN into VX
-                    V[(opcode & 0x0F00) >> 8] = (char)(opcode & 0x00FF);
+                    V[(opcode & 0x0F00) >> 8] = (byte)(opcode & 0x00FF);
+                    pc += 2;
                     break;
                 case 0x7000: // 0x7XNN : Adds NN to VX (carry flag not changed according to Wikipedia)
-                    V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] + (opcode & 0x00FF));
+                    V[(opcode & 0x0F00) >> 8] = (byte)(V[(opcode & 0x0F00) >> 8] + (opcode & 0x00FF));
+                    pc += 2;
                     break;
                 case 0x8000:
                     switch (opcode & 0x000F)
                     {
                         case 0x0000: // 0x8XY0: Sets VX to the value VY
                             V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+                            pc += 2;
                             break;
                         case 0x0001: // 0x8XY1: Sets VX to VX or VY (Bitwise OR)
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4]);
+                            V[(opcode & 0x0F00) >> 8] = (byte)(V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4]);
+                            pc += 2;
                             break;
                         case 0x0002: // 0x8XY2: Sets VX to VX and VY (Bitwise AND)
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4]);
+                            V[(opcode & 0x0F00) >> 8] = (byte)(V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4]);
+                            pc += 2;
                             break;
                         case 0x0003: // 0x8XY3: Sets VX to VX xor VY
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4]);
+                            V[(opcode & 0x0F00) >> 8] = (byte)(V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4]);
+                            pc += 2;
                             break;
                         case 0x0004: // 0x8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
+                            if (V[(opcode & 0x0F00) >> 8] + V[opcode & 0x00F0 >> 4] > 255) {
+                                V[0xF] = 1; // Carry
+                            } else {
+                                V[0xF] = 0;
+                            }
+                            V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
+                            pc += 2;
                             break;
                         case 0x0005: // 0x8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
+                            if (V[(opcode & 0x0F00) >> 8] > V[opcode & 0x00F0 >> 4]) {
+                                V[0xF] = 1; // Borrow
+                            }
+                            else {
+                                V[0xF] = 0;
+                            }
+                            V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
+                            pc += 2;
                             break;
                         case 0x0006: // 0x8XY6: Stores the least significant bit of VX in VF and then shifts VX to the left by 1
+                            V[0xF] = (byte)(0x000F & V[(opcode & 0x0F00) >> 8]);
+                            V[(opcode & 0x0F00)] = (byte)(V[(opcode & 0x0F00)] << 1);
+                            pc += 2;
                             break;
-                        case 0x0007: // 0x8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow nad 1 when there isn't
+                        case 0x0007: // 0x8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow and 1 when there isn't
+                            if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8]) {
+                                V[0xF] = 1;
+                            } else {
+                                V[0xF] = 0;
+                            }
+                            V[(opcode & 0x00F0) >> 4] = (byte)(V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4]);
+                            pc += 2;
                             break;
                         case 0x000E: // 0x8XYE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1
+                            V[0xF] = (byte)(0xF000 & V[(opcode & 0x0F00) >> 8] >> 12); // Might have done this wrong...
+                            V[(opcode & 0x0F00) >> 8] = (byte)(V[(opcode & 0x0F00) >> 8] << 1);
+                            pc += 2;
                             break;
                         default:
                             Console.WriteLine("Error: No '0x8' case caught opcode!");
@@ -158,6 +205,7 @@ namespace Chip8
                     if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]){
                         pc += 2;
                     }
+                    pc += 2;
                     break;
                 case 0xA000: // 0xANNN: Sets I to the address NNN
                     I = (ushort)(opcode & 0x0FFF);
@@ -168,7 +216,8 @@ namespace Chip8
                     break;
                 case 0xC000: // 0xCXNN: Sets VX to the result of a bitwise AND operation on a random number (typically 0 to 255) and NN
                     ushort rand = (ushort)rnd.Next(0, 255);
-                    V[(ushort)(opcode & 0x0F00)] = (char)(rand & (ushort)(opcode & 0x00FF)); // Did casting as a char... work?
+                    V[(ushort)(opcode & 0x0F00) >> 8] = (byte)(rand & (ushort)(opcode & 0x00FF));
+                    pc += 2;
                     break;
                 case 0xD000: // Sprite drawing
                     break;
@@ -188,14 +237,22 @@ namespace Chip8
                     switch(opcode & 0x00FF)
                     {
                         case 0x0007: // 0xFX07: Sets VX to the value of the DT
+                            V[(ushort)(opcode & 0x0F00) >> 8] = delay_timer;
+                            pc += 2;
                             break;
                         case 0x000A: // 0xFX0A: Wait for a key press, store the value in VX
                             break;
                         case 0x0015: // 0xFX15: Delay timer (DT) = VX
+                            delay_timer = V[(ushort)(opcode & 0x0F00) >> 8];
+                            pc += 2;
                             break;
                         case 0x0018: // 0xFX18: Sound timer (ST) = VX
+                            sound_timer = V[(ushort)(opcode & 0x0F00) >> 8];
+                            pc += 2;
                             break;
                         case 0x001E: // 0xFX1E: I = I + VX
+                            I = (byte)(I + V[(ushort)(opcode & 0x0F00) >> 8]);
+                            pc += 2;
                             break;
                         case 0x0029:
                             break;

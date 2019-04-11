@@ -20,7 +20,7 @@ namespace Chip8
         ushort I; // Index register
         ushort pc; // Program counter
 
-        public byte[,] gfx = new byte[64,32];
+        public byte[] gfx = new byte[64 * 32];
 
         ushort[] stack = new ushort[16]; // Anytime you perform a jump or call a subroutine, store the pc in the stack before proceeding
         ushort sp; // stack pointer
@@ -29,6 +29,25 @@ namespace Chip8
         byte sound_timer;
 
         byte[] key = new byte[16]; // Stores states of key presses
+
+        byte[] chip8_fontset = {
+          0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+          0x20, 0x60, 0x20, 0x20, 0x70, // 1
+          0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+          0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+          0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+          0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+          0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+          0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+          0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+          0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+          0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+          0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+          0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+          0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+          0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+          0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+        };
 
         public Boolean drawFlag = false;
 
@@ -50,6 +69,10 @@ namespace Chip8
             Array.Clear(V, 0, V.Length); // Clear registers V0-Vf
             Array.Clear(memory, 0, memory.Length); // Clear memory
 
+            for (int i = 0; i < 80; ++i)
+            {
+                memory[i] = chip8_fontset[i];
+            }
             bool readFromFile = false;
             if (readFromFile)
             {
@@ -224,6 +247,33 @@ namespace Chip8
                     pc += 2;
                     break;
                 case 0xD000: // Sprite drawing
+                            // 0xDXYN draws sprite at X,Y with height N (reads sprite data from
+                            // memory at I and goes I + N times)
+                            // Also does things with carry flag and draw flag
+                    ushort x = V[(opcode & 0x0F00) >> 8];
+                    ushort y = V[(opcode & 0x00F0) >> 4];
+                    ushort height = (ushort)(opcode & 0x000F);
+                    ushort pixel;
+
+                    V[0xF] = 0;
+                    for (int yline = 0; yline < height; yline++)
+                    {
+                        pixel = memory[I + yline]; // more like a row of a sprite than a pixel
+                        for (int xline = 0; xline < 8; xline++)
+                        {
+                            if ((pixel & (0x80 >> xline)) != 0) // does bit == 1?
+                            {
+                                if (gfx[(x + xline + ((y + yline) * 64))] == 1)
+                                {
+                                    V[0xF] = 1; // Did we flip on a pixel?
+                                }
+                                gfx[x + xline + ((y + yline) * 64)] ^= 1; // XOR pixels onto screen
+                            }
+                        }
+                    }
+
+                    drawFlag = true;
+                    pc += 2;
                     break;
                 case 0xE000:
                     switch (opcode & 0x000F)
@@ -306,6 +356,8 @@ namespace Chip8
             // for all keys
             // if key[x] == 0 and input pressed, set key[x] to 1
             // else if key[x] == 1 and input not pressed, set key[x] to 0
+
+            // Call setkeys, find a way to read multiple keys pressed
         }
     }
 }

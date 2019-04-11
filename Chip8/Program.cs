@@ -19,7 +19,6 @@ namespace Chip8
                 DrawGraphics(chippy.gfx);
             }
 
-            // Call setkeys, find a way to read multiple keys pressed
             chippy.SetKeys();
 
             Console.ReadLine(); // used for debug

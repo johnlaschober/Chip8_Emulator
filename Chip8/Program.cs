@@ -14,7 +14,17 @@ namespace Chip8
             Chip8 chippy = new Chip8();
             chippy.Initailize();
             chippy.EmulateCycle();
-            Console.ReadLine();
+
+            if (chippy.drawFlag) {
+                drawGraphics(chippy.gfx);
+            }
+
+            Console.ReadLine(); // used for debug
+            // right now we are emulating 1 frame only
+        }
+
+        static void drawGraphics(byte[,] gfx) {
+            // draw graphics here using a form
         }
     }
 }

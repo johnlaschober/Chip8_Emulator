@@ -20,13 +20,15 @@ namespace Chip8
         ushort I; // Index register
         ushort pc; // Program counter
 
-        byte[,] gfx = new byte[64,32];
+        public byte[,] gfx = new byte[64,32];
 
         ushort[] stack = new ushort[16]; // Anytime you perform a jump or call a subroutine, store the pc in the stack before proceeding
         ushort sp; // stack pointer
 
         byte delay_timer;
         byte sound_timer;
+
+        public Boolean drawFlag = false;
 
         Random rnd;
 

@@ -28,6 +28,8 @@ namespace Chip8
         byte delay_timer;
         byte sound_timer;
 
+        byte[] key = new byte[16]; // Stores states of key presses
+
         public Boolean drawFlag = false;
 
         Random rnd;
@@ -224,11 +226,21 @@ namespace Chip8
                 case 0xD000: // Sprite drawing
                     break;
                 case 0xE000:
-                    switch(opcode & 0x000F)
+                    switch (opcode & 0x000F)
                     {
                         case 0x000E: // 0xEX9E: Skips next instruction if key stored in VX is pressed
+                            if (key[V[(ushort)(opcode & 0x0F00) >> 8]] != 0) {
+                                pc += 4;
+                            } else {
+                                pc += 2;
+                            }
                             break;
                         case 0x0001: // 0xEXA1: Skips next instruction if key stored in VX isn't pressed
+                            if (key[V[(ushort)(opcode & 0x0F00) >> 8]] == 0) {
+                                pc += 4;
+                            } else {
+                                pc += 2;
+                            }
                             break;
                         default:
                             Console.WriteLine("Error: No '0xE' case caught opcode!");
@@ -275,6 +287,25 @@ namespace Chip8
             }
 
             // Update timers
+        }
+
+        /*
+        Keypad                   Keyboard
+        +-+-+-+-+                +-+-+-+-+
+        |1|2|3|C|                |1|2|3|4|
+        +-+-+-+-+                +-+-+-+-+
+        |4|5|6|D|                |Q|W|E|R|
+        +-+-+-+-+       =>       +-+-+-+-+
+        |7|8|9|E|                |A|S|D|F|
+        +-+-+-+-+                +-+-+-+-+
+        |A|0|B|F|                |Z|X|C|V|
+        +-+-+-+-+                +-+-+-+-+
+        */
+        public void SetKeys()
+        {
+            // for all keys
+            // if key[x] == 0 and input pressed, set key[x] to 1
+            // else if key[x] == 1 and input not pressed, set key[x] to 0
         }
     }
 }

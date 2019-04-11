@@ -16,14 +16,17 @@ namespace Chip8
             chippy.EmulateCycle();
 
             if (chippy.drawFlag) {
-                drawGraphics(chippy.gfx);
+                DrawGraphics(chippy.gfx);
             }
+
+            // Call setkeys, find a way to read multiple keys pressed
+            chippy.SetKeys();
 
             Console.ReadLine(); // used for debug
             // right now we are emulating 1 frame only
         }
 
-        static void drawGraphics(byte[,] gfx) {
+        static void DrawGraphics(byte[,] gfx) {
             // draw graphics here using a form
         }
     }

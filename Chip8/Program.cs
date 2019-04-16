@@ -20,25 +20,28 @@ namespace Chip8
             chipForm.Height = 320;
             chipForm.Show();
             Brush whiteBrush = Brushes.White;
+            Brush blackBrush = Brushes.Black;
             Graphics g = chipForm.CreateGraphics();
+
             g.Clear(Color.Black);
-
-            
-
             chippy.Initailize();
-            chippy.EmulateCycle();
 
-            if (chippy.drawFlag) {
-                DrawGraphics(chippy.gfx, g, whiteBrush);
+
+            for (; ;)
+            {
+                chippy.EmulateCycle();
+
+                if (chippy.drawFlag)
+                {
+                    DrawGraphics(chippy.gfx, g, whiteBrush, blackBrush);
+                }
+
+                chippy.SetKeys();
+                Console.ReadLine();
             }
-
-            chippy.SetKeys();
-
-            Console.ReadLine(); // used for debug
-            // right now we are emulating 1 frame only
         }
 
-        static void DrawGraphics(byte[] gfx, Graphics g, Brush b) {
+        static void DrawGraphics(byte[] gfx, Graphics g, Brush wb, Brush bb) {
             // draw graphics here using a form
             // 64 x 32
 
@@ -47,7 +50,15 @@ namespace Chip8
             {
                 x = i % 64;
                 y = i / 64;
-                g.FillRectangle(b, x*10, y*10, 1*10, 1*10);
+                if (gfx[i] == 1)
+                {
+                    g.FillRectangle(wb, x * 10, y * 10, 1 * 10, 1 * 10);
+                }
+                else
+                {
+                    g.FillRectangle(bb, x * 10, y * 10, 1 * 10, 1 * 10);
+                }
+
             }
 
         }

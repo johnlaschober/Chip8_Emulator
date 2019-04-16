@@ -73,10 +73,10 @@ namespace Chip8
             {
                 memory[i] = chip8_fontset[i];
             }
-            bool readFromFile = false;
+            bool readFromFile = true;
             if (readFromFile)
             {
-                byte[] fileBytes = File.ReadAllBytes("E:\\Downloads\\Cave.ch8");
+                byte[] fileBytes = File.ReadAllBytes("D:\\Downloads\\Breakout.ch8");
                 // 00 E0 64     -> How it looks in memory
                 // 0  112  100  -> How it looks as an opcode
 
@@ -99,11 +99,7 @@ namespace Chip8
         {
             // Fetch Opcode
             opcode = (ushort)(memory[pc] << 8 | memory[pc + 1]); // working
-            Console.WriteLine(memory[512]);
-            Console.WriteLine(memory[513]);
-            Console.WriteLine(opcode);
-            Console.WriteLine(opcode & 0x00F0);
-            Console.WriteLine((opcode & 0x00F0)>>4);
+            Console.WriteLine(opcode.ToString("X"));
             // Decode Opcode
             switch (opcode & 0xF000) // Here, only check first bit of opcode using bitwise AND
             {

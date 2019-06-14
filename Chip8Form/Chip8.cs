@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO; // Allows for File library
 
-namespace Chip8
+namespace Chip8Form
 {
     class Chip8
     {
@@ -76,7 +76,7 @@ namespace Chip8
             bool readFromFile = true;
             if (readFromFile)
             {
-                byte[] fileBytes = File.ReadAllBytes("D:\\Downloads\\Breakout.ch8");
+                byte[] fileBytes = File.ReadAllBytes("E:\\Downloads\\Breakout.ch8");
                 // 00 E0 64     -> How it looks in memory
                 // 0  112  100  -> How it looks as an opcode
 
@@ -120,7 +120,7 @@ namespace Chip8
                             pc = stack[sp];
                             --sp;
                             Console.WriteLine("Return from subroutine");
-                            break; 
+                            break;
                         default:
                             Console.WriteLine("Error: No '0x0' case caught opcode!");
                             pc += 2; // Move to next opcode?
@@ -137,19 +137,22 @@ namespace Chip8
                     pc = (ushort)(opcode & 0x0FFF);
                     break;
                 case 0x3000: // 0x3XNN: Skip next instruction if VX == NN (increment PC by 2)
-                    if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)){
+                    if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
+                    {
                         pc += 2;
                     }
                     pc += 2;
                     break;
                 case 0x4000: // 0x4XNN: Skip next instruction if VX != KK (increment PC by 2)
-                    if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)){
+                    if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+                    {
                         pc += 2;
                     }
                     pc += 2;
                     break;
                 case 0x5000: // 0x5XY0: Skip next instruction if VX == VY (increment PC by 2)
-                    if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]){
+                    if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4])
+                    {
                         pc += 2;
                     }
                     pc += 2;
@@ -182,19 +185,24 @@ namespace Chip8
                             pc += 2;
                             break;
                         case 0x0004: // 0x8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
-                            if (V[(opcode & 0x0F00) >> 8] + V[opcode & 0x00F0 >> 4] > 255) {
+                            if (V[(opcode & 0x0F00) >> 8] + V[opcode & 0x00F0 >> 4] > 255)
+                            {
                                 V[0xF] = 1; // Carry
-                            } else {
+                            }
+                            else
+                            {
                                 V[0xF] = 0;
                             }
                             V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
                             pc += 2;
                             break;
                         case 0x0005: // 0x8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
-                            if (V[(opcode & 0x0F00) >> 8] > V[opcode & 0x00F0 >> 4]) {
+                            if (V[(opcode & 0x0F00) >> 8] > V[opcode & 0x00F0 >> 4])
+                            {
                                 V[0xF] = 1; // Borrow
                             }
-                            else {
+                            else
+                            {
                                 V[0xF] = 0;
                             }
                             V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
@@ -206,9 +214,12 @@ namespace Chip8
                             pc += 2;
                             break;
                         case 0x0007: // 0x8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow and 1 when there isn't
-                            if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8]) {
+                            if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8])
+                            {
                                 V[0xF] = 1;
-                            } else {
+                            }
+                            else
+                            {
                                 V[0xF] = 0;
                             }
                             V[(opcode & 0x00F0) >> 4] = (byte)(V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4]);
@@ -225,7 +236,8 @@ namespace Chip8
                     }
                     break;
                 case 0x9000: // 0x9XY0: Skips the next instruction if VX doesn't equal VY
-                    if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]){
+                    if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4])
+                    {
                         pc += 2;
                     }
                     pc += 2;
@@ -243,9 +255,9 @@ namespace Chip8
                     pc += 2;
                     break;
                 case 0xD000: // Sprite drawing
-                            // 0xDXYN draws sprite at X,Y with height N (reads sprite data from
-                            // memory at I and goes I + N times)
-                            // Also does things with carry flag and draw flag
+                             // 0xDXYN draws sprite at X,Y with height N (reads sprite data from
+                             // memory at I and goes I + N times)
+                             // Also does things with carry flag and draw flag
                     ushort x = V[(opcode & 0x0F00) >> 8];
                     ushort y = V[(opcode & 0x00F0) >> 4];
                     ushort height = (ushort)(opcode & 0x000F);
@@ -275,16 +287,22 @@ namespace Chip8
                     switch (opcode & 0x000F)
                     {
                         case 0x000E: // 0xEX9E: Skips next instruction if key stored in VX is pressed
-                            if (key[V[(ushort)(opcode & 0x0F00) >> 8]] != 0) {
+                            if (key[V[(ushort)(opcode & 0x0F00) >> 8]] != 0)
+                            {
                                 pc += 4;
-                            } else {
+                            }
+                            else
+                            {
                                 pc += 2;
                             }
                             break;
                         case 0x0001: // 0xEXA1: Skips next instruction if key stored in VX isn't pressed
-                            if (key[V[(ushort)(opcode & 0x0F00) >> 8]] == 0) {
+                            if (key[V[(ushort)(opcode & 0x0F00) >> 8]] == 0)
+                            {
                                 pc += 4;
-                            } else {
+                            }
+                            else
+                            {
                                 pc += 2;
                             }
                             break;
@@ -294,13 +312,29 @@ namespace Chip8
                     }
                     break;
                 case 0xF000:
-                    switch(opcode & 0x00FF)
+                    switch (opcode & 0x00FF)
                     {
                         case 0x0007: // 0xFX07: Sets VX to the value of the DT
                             V[(ushort)(opcode & 0x0F00) >> 8] = delay_timer;
                             pc += 2;
                             break;
                         case 0x000A: // 0xFX0A: Wait for a key press, store the value in VX
+                            bool keyPressed = false;
+
+                            for (int i = 0; i < key.Length; i++)
+                            {
+                                if (key[i] != 0)
+                                {
+                                    V[(ushort)(opcode & 0x0F00) >> 8] = (byte)i;
+                                    keyPressed = true;
+                                }
+
+                                if (!keyPressed)
+                                {
+                                    return;
+                                }
+                                pc += 2;
+                            }
                             break;
                         case 0x0015: // 0xFX15: Delay timer (DT) = VX
                             delay_timer = V[(ushort)(opcode & 0x0F00) >> 8];
@@ -315,12 +349,31 @@ namespace Chip8
                             pc += 2;
                             break;
                         case 0x0029:
+                            I = (byte)(V[(ushort)(opcode & 0x0F00) >> 8] * 0x5);
                             break;
                         case 0x0033:
+                            memory[I] = (byte)(V[(opcode & 0x0F00) >> 8] / 100);
+                            memory[I + 1] = (byte)((V[(opcode & 0x0F00) >> 8] / 10) % 10);
+                            memory[I + 2] = (byte)((V[(opcode & 0x0F00) >> 8] % 100) % 10);
+                            pc += 2;
                             break;
                         case 0x0055:
+                            for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i)
+                            {
+                                memory[I + i] = V[i];
+                            }
+
+                            I += (ushort)(((opcode & 0x0F00) >> 8) + 1);
+                            pc += 2;
                             break;
                         case 0x0065:
+                            for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i)
+                            {
+                                V[i] = memory[I + i];
+                            }
+
+                            I += (ushort)(((opcode & 0x0F00) >> 8) + 1);
+                            pc += 2;
                             break;
                         default:
                             Console.WriteLine("Error: No '0xF' case caught opcode!");
@@ -347,13 +400,5 @@ namespace Chip8
         |A|0|B|F|                |Z|X|C|V|
         +-+-+-+-+                +-+-+-+-+
         */
-        public void SetKeys()
-        {
-            // for all keys
-            // if key[x] == 0 and input pressed, set key[x] to 1
-            // else if key[x] == 1 and input not pressed, set key[x] to 0
-
-            // Call setkeys, find a way to read multiple keys pressed
-        }
     }
 }

@@ -1,0 +1,10 @@
+C:\Users\John\source\repos\Chip8Form\Chip8Form\bin\Debug\Chip8Form.exe.config
+C:\Users\John\source\repos\Chip8Form\Chip8Form\bin\Debug\Chip8Form.exe
+C:\Users\John\source\repos\Chip8Form\Chip8Form\bin\Debug\Chip8Form.pdb
+C:\Users\John\source\repos\Chip8Form\Chip8Form\obj\Debug\Chip8Form.csprojAssemblyReference.cache
+C:\Users\John\source\repos\Chip8Form\Chip8Form\obj\Debug\Chip8Form.Form1.resources
+C:\Users\John\source\repos\Chip8Form\Chip8Form\obj\Debug\Chip8Form.Properties.Resources.resources
+C:\Users\John\source\repos\Chip8Form\Chip8Form\obj\Debug\Chip8Form.csproj.GenerateResource.cache
+C:\Users\John\source\repos\Chip8Form\Chip8Form\obj\Debug\Chip8Form.csproj.CoreCompileInputs.cache
+C:\Users\John\source\repos\Chip8Form\Chip8Form\obj\Debug\Chip8Form.exe
+C:\Users\John\source\repos\Chip8Form\Chip8Form\obj\Debug\Chip8Form.pdb
